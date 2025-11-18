@@ -97,7 +97,6 @@ async function handleLogin(e) {
         
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'login',
                 bolao: bolao,
@@ -207,7 +206,6 @@ async function carregarPalpitesSalvos(bolao, participante) {
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'carregar',
                 bolao: bolao,
@@ -439,7 +437,6 @@ async function handleSubmit() {
         
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'salvar',
                 bolao: bolao,
