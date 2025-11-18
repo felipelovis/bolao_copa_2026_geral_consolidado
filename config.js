@@ -27,3 +27,4 @@ const SPREADSHEET_ID = '1YpZOyzF1Uph8iBNFwx7xUizSzJUwm1wU-8YdWspH9tY';
 // CHAVE DA API DO GOOGLE
 const API_KEY = 'AIzaSyDFMcnjQHmqQhKyWysq5GHyCRINDnitg_A';
 
+/*s*/
