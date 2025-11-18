@@ -5,8 +5,6 @@ let palpitesUsuario = {};
 let palpitesAtuais = {};
 let userToken = null;
 
-const BACKEND_URL = 'https://bolao-2026-geral-backend.vercel.app';
-
 // Elementos DOM
 const loginScreen = document.getElementById('loginScreen');
 const appScreen = document.getElementById('appScreen');
