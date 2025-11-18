@@ -5,7 +5,6 @@ let palpitesUsuario = {};
 let palpitesAtuais = {};
 let userToken = null;
 
-
 const BACKEND_URL = 'https://bolao-2026-geral-backend.vercel.app';
 
 // Elementos DOM
@@ -74,13 +73,13 @@ function faseEstaAberta(fase) {
     return !calcularTempoRestante(DATAS_LIMITE[fase]).encerrado;
 }
 
-// Login com backend
-async function login(e) {
+// ===== LOGIN (MULTI-BOLÃO) =====
+async function handleLogin(e) {
     e.preventDefault();
     
     const bolao = document.getElementById('bolaoSelect').value;
-    const nome = document.getElementById('nome').value;
-    const codigo = document.getElementById('codigo').value;
+    const nome = document.getElementById('nome').value.trim();
+    const codigo = document.getElementById('codigo').value.trim();
     
     // Validar seleção de bolão
     if (!bolao) {
@@ -88,7 +87,14 @@ async function login(e) {
         return;
     }
     
+    if (!nome || !codigo) {
+        mostrarErro('Preencha todos os campos');
+        return;
+    }
+    
     try {
+        loginError.style.display = 'none';
+        
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -106,36 +112,37 @@ async function login(e) {
             // Salvar dados na sessão
             sessionStorage.setItem('bolao', bolao);
             sessionStorage.setItem('participante', nome);
+            usuarioLogado = nome;
             
             // Esconder login, mostrar app
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'block';
+            loginScreen.style.display = 'none';
+            appScreen.style.display = 'block';
             
             // Mostrar nome do usuário
-            document.getElementById('nomeUsuario').textContent = nome;
+            nomeUsuario.textContent = nome;
             
             // Configurar link do Power BI
             configurarLinkPowerBI(bolao);
             
-            // Carregar jogos
-            carregarJogos();
+            // Carregar dados
+            await carregarDados();
             
             // Carregar palpites salvos
-            carregarPalpitesSalvos(bolao, nome);
+            await carregarPalpitesSalvos(bolao, nome);
             
         } else {
-            mostrarErro(data.message || 'Login inválido');
+            mostrarErro(data.message || 'Nome, código ou bolão inválidos');
         }
         
     } catch (error) {
-        mostrarErro('Erro ao conectar com servidor: ' + error.message);
+        mostrarErro('Erro ao conectar: ' + error.message);
+        console.error('Erro no login:', error);
     }
 }
 
 function mostrarErro(mensagem) {
-    const errorDiv = document.getElementById('loginError');
-    errorDiv.textContent = mensagem;
-    errorDiv.style.display = 'block';
+    loginError.textContent = mensagem;
+    loginError.style.display = 'block';
 }
 
 // Logout
@@ -143,12 +150,17 @@ function handleLogout() {
     usuarioLogado = null;
     userToken = null;
     palpitesAtuais = {};
+    palpitesUsuario = {};
+    
+    sessionStorage.clear();
     
     loginScreen.style.display = 'block';
     appScreen.style.display = 'none';
     
+    document.getElementById('bolaoSelect').value = '';
     document.getElementById('nome').value = '';
     document.getElementById('codigo').value = '';
+    loginError.style.display = 'none';
 }
 
 // Carregar dados do Google Sheets
@@ -158,7 +170,6 @@ async function carregarDados() {
         jogosContainer.innerHTML = '';
         
         await carregarJogos();
-        await carregarPalpites();
         
         renderizarJogos();
         
@@ -191,30 +202,42 @@ async function carregarJogos() {
     });
 }
 
-// Carregar palpites do usuário
-async function carregarPalpites() {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/PALPITES?key=${API_KEY}`;
-    
+// ===== CARREGAR PALPITES SALVOS (MULTI-BOLÃO) =====
+async function carregarPalpitesSalvos(bolao, participante) {
     try {
-        const response = await fetch(url);
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'carregar',
+                bolao: bolao,
+                participante: participante
+            })
+        });
+        
         const data = await response.json();
         
-        if (data.values && data.values.length > 1) {
-            const headers = data.values[0];
-            const rows = data.values.slice(1);
+        if (data.success && data.palpites) {
+            // Preencher objeto palpitesUsuario
+            data.palpites.forEach(palpite => {
+                palpitesUsuario[palpite.idJogo] = {
+                    golsA: parseInt(palpite.golsA) || 0,
+                    golsB: parseInt(palpite.golsB) || 0
+                };
+            });
             
-            rows.forEach(row => {
-                if (row[0] === usuarioLogado) {
-                    const idJogo = row[1];
-                    palpitesUsuario[idJogo] = {
-                        golsA: parseInt(row[2]) || 0,
-                        golsB: parseInt(row[3]) || 0
-                    };
-                }
+            // Preencher campos no HTML
+            data.palpites.forEach(palpite => {
+                const inputA = document.querySelector(`input[data-jogo="${palpite.idJogo}"][data-time="A"]`);
+                const inputB = document.querySelector(`input[data-jogo="${palpite.idJogo}"][data-time="B"]`);
+                
+                if (inputA) inputA.value = palpite.golsA;
+                if (inputB) inputB.value = palpite.golsB;
             });
         }
+        
     } catch (error) {
-        console.log('Nenhum palpite anterior encontrado');
+        console.log('Nenhum palpite anterior encontrado:', error);
     }
 }
 
@@ -350,8 +373,12 @@ function handlePalpiteChange(e) {
     }
 }
 
-// Enviar palpites via backend
+// ===== ENVIAR PALPITES (MULTI-BOLÃO) =====
 async function handleSubmit() {
+    const bolao = sessionStorage.getItem('bolao');
+    const participante = sessionStorage.getItem('participante');
+    
+    // Coletar todos os palpites dos inputs
     const inputs = document.querySelectorAll('.gols-input');
     inputs.forEach(input => {
         const idJogo = input.dataset.jogo;
@@ -383,6 +410,13 @@ async function handleSubmit() {
         return;
     }
     
+    // Converter para array de palpites
+    const palpitesArray = Object.entries(palpitesFasesAbertas).map(([idJogo, palpite]) => ({
+        idJogo: idJogo,
+        golsA: palpite.golsA,
+        golsB: palpite.golsB
+    }));
+    
     // Mostrar barra de progresso
     submitContainer.style.display = 'none';
     progressContainer.style.display = 'block';
@@ -393,7 +427,7 @@ async function handleSubmit() {
     const progressPercentage = document.getElementById('progressPercentage');
     
     progressText.textContent = '⏳ Salvando palpites...';
-    progressDetails.textContent = `Salvando ${Object.keys(palpitesFasesAbertas).length} palpites de fases abertas`;
+    progressDetails.textContent = `Salvando ${palpitesArray.length} palpites`;
     progressFill.style.width = '30%';
     progressPercentage.textContent = '30%';
     
@@ -403,31 +437,30 @@ async function handleSubmit() {
             progressPercentage.textContent = '60%';
         }, 500);
         
-        const response = await fetch(`${BACKEND_URL}/api/salvar`, {
+        const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                participante: usuarioLogado,
-                palpites: palpitesFasesAbertas,
-                token: userToken
+                action: 'salvar',
+                bolao: bolao,
+                participante: participante,
+                palpites: palpitesArray
             })
         });
         
         const data = await response.json();
         
-        if (response.ok && data.success) {
+        if (data.success) {
             progressFill.style.width = '100%';
             progressPercentage.textContent = '100%';
             progressText.textContent = '✅ Palpites salvos!';
-            progressDetails.textContent = `${Object.keys(palpitesFasesAbertas).length} palpites salvos com sucesso!`;
+            progressDetails.textContent = data.message;
             
             setTimeout(() => {
                 progressContainer.style.display = 'none';
                 submitContainer.style.display = 'block';
                 
-                successMessage.innerHTML = `✅ ${Object.keys(palpitesFasesAbertas).length} palpites salvos com sucesso! Boa sorte! 🍀`;
+                successMessage.innerHTML = `✅ ${data.message} Boa sorte! 🍀`;
                 successMessage.style.display = 'block';
                 
                 setTimeout(() => {
@@ -435,17 +468,18 @@ async function handleSubmit() {
                 }, 5000);
             }, 2000);
         } else {
-            throw new Error(data.error || 'Erro ao salvar');
+            throw new Error(data.message || 'Erro ao salvar');
         }
         
     } catch (error) {
         progressContainer.style.display = 'none';
         submitContainer.style.display = 'block';
         alert('❌ Erro ao salvar: ' + error.message);
+        console.error('Erro ao salvar:', error);
     }
 }
 
-
+// ===== CONFIGURAR LINK POWER BI =====
 function configurarLinkPowerBI(bolao) {
     const linkPowerBI = POWER_BI_LINKS[bolao];
     
