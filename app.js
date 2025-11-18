@@ -75,44 +75,67 @@ function faseEstaAberta(fase) {
 }
 
 // Login com backend
-async function handleLogin(e) {
+async function login(e) {
     e.preventDefault();
     
-    const nome = document.getElementById('nome').value.trim();
+    const bolao = document.getElementById('bolaoSelect').value;
+    const nome = document.getElementById('nome').value;
     const codigo = document.getElementById('codigo').value;
     
-    loginError.textContent = '⏳ Verificando...';
+    // Validar seleção de bolão
+    if (!bolao) {
+        mostrarErro('Por favor, selecione um bolão');
+        return;
+    }
     
     try {
-        const response = await fetch(`${BACKEND_URL}/api/login`, {
+        const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ nome, codigo })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'login',
+                bolao: bolao,
+                nome: nome,
+                codigo: codigo
+            })
         });
         
         const data = await response.json();
         
-        if (response.ok && data.success) {
-            usuarioLogado = nome;
-            userToken = data.token;
-            loginError.textContent = '';
-            nomeUsuario.textContent = nome;
+        if (data.success) {
+            // Salvar dados na sessão
+            sessionStorage.setItem('bolao', bolao);
+            sessionStorage.setItem('participante', nome);
             
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'block';
-
-            document.getElementById('rankingSection').style.display = 'block';
+            // Esconder login, mostrar app
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
             
-            carregarDados();
+            // Mostrar nome do usuário
+            document.getElementById('nomeUsuario').textContent = nome;
+            
+            // Configurar link do Power BI
+            configurarLinkPowerBI(bolao);
+            
+            // Carregar jogos
+            carregarJogos();
+            
+            // Carregar palpites salvos
+            carregarPalpitesSalvos(bolao, nome);
+            
         } else {
-            loginError.textContent = '❌ ' + (data.error || 'Nome ou código inválido!');
+            mostrarErro(data.message || 'Login inválido');
         }
+        
     } catch (error) {
-        loginError.textContent = '❌ Erro de conexão. Tente novamente.';
-        console.error('Erro no login:', error);
+        mostrarErro('Erro ao conectar com servidor: ' + error.message);
     }
+}
+
+function mostrarErro(mensagem) {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.textContent = mensagem;
+    errorDiv.style.display = 'block';
 }
 
 // Logout
@@ -419,5 +442,17 @@ async function handleSubmit() {
         progressContainer.style.display = 'none';
         submitContainer.style.display = 'block';
         alert('❌ Erro ao salvar: ' + error.message);
+    }
+}
+
+
+function configurarLinkPowerBI(bolao) {
+    const linkPowerBI = POWER_BI_LINKS[bolao];
+    
+    if (linkPowerBI) {
+        const btnRanking = document.querySelector('.btn-ranking');
+        if (btnRanking) {
+            btnRanking.href = linkPowerBI;
+        }
     }
 }
