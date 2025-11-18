@@ -1,5 +1,16 @@
 // ==================== CONFIGURAÇÕES ====================
 
+// ===== CONFIGURAÇÃO BACKEND =====
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY6lG1YK-t7h5zuxxdvEsMCojRAgQOpKcKwPtnfFNoTXMRhoD2KEkJ-FhrOXyavMV3/exec';
+
+// ===== LINKS DOS POWER BIs POR BOLÃO =====
+const POWER_BI_LINKS = {
+    'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiYjg2YTNiZjMtNGI0OS00NmQxLTllYjMtNDUzYzMyZjliZGM2IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9&pageName=ReportSection16fe902b8ade46b31c66',
+    'AMIGOS': 'https://app.powerbi.com/view?r=SEU_LINK_POWER_BI_AMIGOS_AQUI', // TROCAR depois
+    // Adicione mais bolões conforme necessário
+};
+
+
 // DATAS LIMITE por fase (CORRIGIDO PARA 2026!)
 const DATAS_LIMITE = {
     'Grupo': new Date('2026-06-12T14:00:00'),
@@ -11,7 +22,7 @@ const DATAS_LIMITE = {
     'Final': new Date('2025-11-12T16:00:00'),
 };
 // ID DO GOOGLE SHEETS
-const SPREADSHEET_ID = '1JgNY9wNnoYiR2bDzotxoAujXS7eUHReFG_l9-fZ_eqA';
+const SPREADSHEET_ID = '1YpZOyzF1Uph8iBNFwx7xUizSzJUwm1wU-8YdWspH9tY';
 
 // CHAVE DA API DO GOOGLE
 const API_KEY = 'AIzaSyDFMcnjQHmqQhKyWysq5GHyCRINDnitg_A';
