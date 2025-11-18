@@ -3,7 +3,6 @@ let usuarioLogado = null;
 let jogosData = [];
 let palpitesUsuario = {};
 let palpitesAtuais = {};
-let userToken = null;
 
 // Elementos DOM
 const loginScreen = document.getElementById('loginScreen');
