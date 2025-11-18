@@ -1,7 +1,7 @@
 // ==================== CONFIGURAÇÕES ====================
 
 // ===== CONFIGURAÇÃO BACKEND =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-Jy7Mhh-_nyvWcFUfJbaRVAvtEkKLo2726qz9S35qidBqSi5UfNxYzo5ECXYrWtaj/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytKUd01OGfnMNxonh9hr8JNuJAnBP33v3TgE6x4ugR1i-JpvztGbo7JmLaWhx0UDop/exec';
 
 // ===== LINKS DOS POWER BIs POR BOLÃO =====
 const POWER_BI_LINKS = {
