@@ -5,8 +5,8 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLS9R1U9HnYUKW
 
 // ===== LINKS DOS POWER BIs POR BOLÃO =====
 const POWER_BI_LINKS = {
-    'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiYjg2YTNiZjMtNGI0OS00NmQxLTllYjMtNDUzYzMyZjliZGM2IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
-    'AMIGOS': 'https://app.powerbi.com/view?r=eyJrIjoiN2U0MzgxNWUtZDY1Yy00MDFiLWIyZDEtNmQ3YTEyMTY1ZTFmIiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
+    'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiZTY5YWZmYzYtZDVjZC00YmE1LWEwYzktY2RmZDBmMzIxMWU4IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
+    'AMIGOS': 'https://app.powerbi.com/view?r=eyJrIjoiODZmNTQ5ZWEtODY5NS00ZDIzLTgxMmItMThhOWQ3MzgxNmM1IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
     // Adicione mais bolões conforme necessário
 };
 
