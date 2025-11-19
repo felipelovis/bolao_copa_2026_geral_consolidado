@@ -478,7 +478,7 @@ function configurarLinkPowerBI(bolao) {
     const linkPowerBI = POWER_BI_LINKS[bolao];
     
     if (linkPowerBI) {
-        const btnRanking = document.querySelector('.btn-ranking');
+        const btnRanking = document.getElementById('linkRanking');
         if (btnRanking) {
             btnRanking.href = linkPowerBI;
         }
